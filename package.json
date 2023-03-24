@@ -1,7 +1,7 @@
 {
-  "name": "type-graphql--prisma--redis",
+  "name": "abc",
   "version": "1.0.0",
-  "description": "type-graphql--prisma--redis",
+  "description": "abc",
   "main": "src/main.ts",
   "scripts": {
     "start": "ts-node src/main.ts",
