@@ -1,0 +1,90 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+ model User {
+   id          Int   @id @default(autoincrement())
+   name        String
+   email       String   @unique
+   password    String
+   confirmed   Boolean  @default(false)
+   role        Role     @default(USER)
+   profile     Profile?
+   tasks       Task[]
+   createdAt   DateTime @default(now())
+   updatedAt   DateTime @updatedAt
+   rememberToken String?
+ }
+
+model Profile {
+   id     Int    @id @default(autoincrement())
+   bio    String
+   user   User?   @relation(fields: [userId], references: [id])
+   userId Int?    @unique
+}
+
+ model Task {
+   id          Int   @id @default(autoincrement())
+   name        String
+   description String?
+   expires     DateTime @default(dbgenerated("now() + INTERVAL '7 DAYS'"))
+   isCompleted Boolean  @default(false)
+   photo       Photo[]
+   comments    Comment[]
+   categories  CategoriesOnTasks[]
+   user        User?   @relation(fields: [userId], references: [id])
+   userId      Int?
+   createdAt   DateTime @default(now())
+   updatedAt   DateTime @updatedAt
+
+   @@index([isCompleted])
+   @@index([expires])
+ }
+
+model Photo {
+   id        Int     @id @default(autoincrement())
+   task      Task    @relation(fields: [taskId], references: [id])
+   taskId    Int
+   filename  String
+
+   @@index([taskId])
+ }
+
+ model Comment {
+   id        Int     @id @default(autoincrement())
+   content   String
+   published Boolean @default(true)
+   task      Task    @relation(fields: [taskId], references: [id])
+   taskId    Int
+   views     Int     @default(0)
+   likes     Int     @default(0)
+
+   @@index([taskId])
+   @@index([published])
+ }
+
+ model Category {
+   id    Int         @id @default(autoincrement())
+   name  String
+   tasks CategoriesOnTasks[]
+ }
+
+ model CategoriesOnTasks {
+   task       Task     @relation(fields: [taskId], references: [id])
+   taskId     Int
+   category   Category @relation(fields: [categoryId], references: [id])
+   categoryId Int
+   assignedAt DateTime @default(now())
+
+   @@id([taskId, categoryId])
+ }
+
+ enum Role {
+   USER
+   ADMIN
+ }
